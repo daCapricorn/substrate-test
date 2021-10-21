@@ -60,12 +60,11 @@ const app = new App()
 app.use(require('body-parser').json())
 
 app.post('/substrate/decode', async (req, res) => {
-  console.log('--------------------------');
   try {
     const result = await decodePayload(req.body);
     res.json({ code: 0, result });
   } catch (error) {
-  console.error(error);
+    console.error(error);
     res.json({ code: 1, message: error.message });
   }
 })
