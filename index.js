@@ -1,8 +1,7 @@
-const { decode,
-  getRegistryBase,
-  getSpecTypes,
-  TypeRegistry,
-} = require('@substrate/txwrapper-core');
+const { createMetadata, getSpecTypes, toTxMethod } = require('@substrate/txwrapper-core');
+const { createTypeUnsafe, TypeRegistry } = require('@polkadot/types');
+// const { u8aToHex, hexToU8a } = require('@polkadot/util');
+// const { blake2AsU8a, blake2AsHex } = require('@polkadot/util-crypto');
 // const { GenericExtrinsicPayload, GenericCall } = require('@polkadot/types');
 
 const PolkadotSS58Format = {
@@ -13,6 +12,11 @@ const PolkadotSS58Format = {
 };
 
 const KNOWN_CHAIN_PROPERTIES = {
+  westend: {
+    ss58Format: PolkadotSS58Format.westend,
+    tokenDecimals: 12,
+    tokenSymbol: 'WND',
+  },
   kusama: {
     ss58Format: PolkadotSS58Format.kusama,
     tokenDecimals: 12,
@@ -25,35 +29,58 @@ const KNOWN_CHAIN_PROPERTIES = {
   }
 };
 
+// metadata cache
+const METADATA_MAP = {
+  Westend: null,
+  Polkadot: null,
+};
+
+// The default type registry has polkadot types
+const registry = new TypeRegistry();
+
+// preload
+(async () => {
+  await Promise.all(Object.keys(METADATA_MAP).map(async (chainName) => {
+    try {
+      let metadataRpc = await fs.readFile(`./metadata/${chainName.toLowerCase()}/v14.raw`);
+      metadataRpc = metadataRpc.toString().trim();
+      METADATA_MAP[chainName] = createMetadata(registry, metadataRpc);
+    } catch (error) {
+      //
+    }
+  }));
+})();
+
 function getRegistry({
   specName,
   chainName,
   specVersion,
-  metadataRpc,
+  metadata,
   properties,
 }) {
-  // The default type registry has polkadot types
-  const registry = new TypeRegistry();
-  
   // As of now statemine is not a supported specName in the default polkadot-js/api type registry.
   const chainNameAdjusted = chainName === 'Statemine' ? 'Statemint' : chainName;
   const specNameAdjusted = specName === 'statemine' ? 'statemint' : specName;
+  registry.register(getSpecTypes(
+    registry,
+    chainNameAdjusted,
+    specNameAdjusted,
+    specVersion
+  ));
+
+  METADATA_MAP[chainName] = metadata;
+  registry.setMetadata(metadata);
+
+  // Register the chain properties for this registry
+  const chainProperties = properties || KNOWN_CHAIN_PROPERTIES[specName];
+  registry.setChainProperties(registry.createType('ChainProperties', chainProperties));
   
-  return getRegistryBase({
-    chainProperties: properties || KNOWN_CHAIN_PROPERTIES[specName],
-    specTypes: getSpecTypes(
-      registry,
-      chainNameAdjusted,
-      specNameAdjusted,
-      specVersion
-    ),
-    metadataRpc,
-  });
+  return registry;
 }
 
 const { App } = require('@tinyhttp/app');
 const axios = require('axios').default;
-const fs = require('fs');
+const fs = require('fs').promises;
 
 const app = new App()
 
@@ -71,39 +98,74 @@ app.post('/substrate/decode', async (req, res) => {
 
 app.listen(3578)
 
-async function decodePayload({ signingPayload, metadata, chain }) {
+async function decodePayload({ signingPayload, metadata: version, chain }) {
   let chainName = !chain ? 'Polkadot' : (chain.charAt(0).toUpperCase() + chain.slice(1));
 
-  let metadataRpc = '';
-  if (metadata && parseInt(metadata) != NaN) {
-    try {
-      metadataRpc = fs.readFileSync(`./metadata/${chainName.toLowerCase()}/v${metadata}.raw`).toString().trim();
-    } catch (error) {
-      //
+  let metadata = METADATA_MAP[chainName];
+  if (version && parseInt(version) != NaN) {
+    if (metadata && metadata.version == version) {
+      // pass through
+    } else {
+      metadata = null;
     }
   }
-  
-  if (!metadataRpc) {
-    const { data: { result } } = await axios.post(`https://${chainName.toLowerCase()}.api.onfinality.io/public`, {
-      id: "1",
-      jsonrpc: "2.0",
-      method: "state_getMetadata",
-      params: [],
-    });
-    metadataRpc = result;
+
+  if (!metadata) {
+    let metadataRpc = null;
+
+    try {
+      metadataRpc = await fs.readFile(`./metadata/${chainName.toLowerCase()}/v${version}.raw`);
+      metadataRpc = metadataRpc.toString().trim();
+    } catch (error) {
+      //
+      console.error(error);
+    }
+
+    if (!metadataRpc) {
+      const { data: { result } } = await axios.post(`https://${chainName.toLowerCase()}.api.onfinality.io/public`, {
+        id: "1",
+        jsonrpc: "2.0",
+        method: "state_getMetadata",
+        params: [],
+      });
+      metadataRpc = result;
+    }
+
+    metadata = createMetadata(registry, metadataRpc);
   }
 
-  const registry = getRegistry({
+  getRegistry({
     chainName,
     specName: chainName.toLowerCase(),
-    metadataRpc,
+    metadata,
   });
 
   // const { method } = GenericExtrinsicPayload.decodeExtrinsicPayload(registry, signingPayload, 4);
   // const call = new GenericCall(registry, method, registry.metadata);
   // console.log(call.toHuman());
 
-  const { metadataRpc: _tmp, ...decoded } = decode(signingPayload, { metadataRpc, registry });
+  const payload = createTypeUnsafe(registry, 'ExtrinsicPayload', [
+      signingPayload,
+      {
+          version: 4,
+      },
+  ]);
+
+  const methodCall = createTypeUnsafe(registry, 'Call', [payload.method]);
+  const method = toTxMethod(registry, methodCall);
+
+  const decoded = {
+      blockHash: payload.blockHash.toHex(),
+      eraPeriod: payload.era.asMortalEra.period.toNumber(),
+      genesisHash: payload.genesisHash.toHex(),
+      method,
+      nonce: payload.nonce.toNumber(),
+      specVersion: payload.specVersion.toNumber(),
+      tip: payload.tip.toNumber(),
+      transactionVersion: payload.transactionVersion.toNumber(),
+  };
+  // const { metadataRpc: _tmp, ...decoded } = decode(signingPayload, { metadataRpc, registry });
+  // console.log(JSON.stringify(decoded));
 
   return decoded;
 }
