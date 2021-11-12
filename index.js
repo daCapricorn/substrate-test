@@ -1,8 +1,63 @@
-const { createMetadata, getSpecTypes, toTxMethod } = require('@substrate/txwrapper-core');
+const { createMetadata, getSpecTypes/*, toTxMethod*/ } = require('@substrate/txwrapper-core');
 const { createTypeUnsafe, TypeRegistry } = require('@polkadot/types');
-// const { u8aToHex, hexToU8a } = require('@polkadot/util');
-// const { blake2AsU8a, blake2AsHex } = require('@polkadot/util-crypto');
-// const { GenericExtrinsicPayload, GenericCall } = require('@polkadot/types');
+const { stringCamelCase } = require('@polkadot/util');
+const { GenericExtrinsicPayload, Struct, Compact } = require('@polkadot/types');
+const { AbstractInt } = require('@polkadot/types/codec/AbstractInt');
+
+const fs = require('fs');
+const path = require('path');
+
+function toTxMethod(registry, method) {
+	const argsDef = JSON.parse(method.Type.args);
+  console.log(argsDef);
+	const args = Object.keys(argsDef).reduce((accumulator, key, index) => {
+		let codec = createTypeUnsafe(registry, argsDef[key], [
+			method.args[index],
+		]);
+
+		if (codec instanceof Compact) {
+			codec = codec.unwrap();
+		}
+
+		const jsonArg =
+			codec instanceof AbstractInt ? codec.toString(10) : codec.toJSON();
+
+		accumulator[stringCamelCase(key)] = {
+      type: argsDef[key],
+      value: jsonArg,
+    };
+
+		return accumulator;
+	}, {});
+
+	return {
+		args,
+		name: method.method,
+		pallet: method.section,
+	};
+}
+
+class QRPayload extends Struct {
+  constructor (registry, value) {
+    super(registry, {
+      method: 'Bytes',
+      // extrinsics: 'ExtrinsicPayload',
+      genesisHash: 'Hash',
+    }, value);
+  }
+
+  get method () {
+    return this.get('method');
+  }
+
+  get extrinsics () {
+    return this.get('extrinsics');
+  }
+
+  get genesisHash () {
+    return this.get('genesisHash');
+  }
+}
 
 const PolkadotSS58Format = {
   polkadot: 0,
@@ -31,22 +86,31 @@ const KNOWN_CHAIN_PROPERTIES = {
 
 // metadata cache
 const METADATA_MAP = {
-  Westend: null,
+  // Westend: null,
   Polkadot: null,
 };
 
 // The default type registry has polkadot types
 const registry = new TypeRegistry();
 
+function readFileAsync(filePath) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filePath, (err, res) => {
+      if (err) return reject(err);
+      resolve(res);
+    })
+  });
+}
+
 // preload
 (async () => {
   await Promise.all(Object.keys(METADATA_MAP).map(async (chainName) => {
     try {
-      let metadataRpc = await fs.readFile(`./metadata/${chainName.toLowerCase()}/v14.raw`);
+      let metadataRpc = await readFileAsync(path.resolve(__dirname, `./metadata/${chainName.toLowerCase()}/v14.raw`));
       metadataRpc = metadataRpc.toString().trim();
       METADATA_MAP[chainName] = createMetadata(registry, metadataRpc);
     } catch (error) {
-      //
+      console.error(error);
     }
   }));
 })();
@@ -80,11 +144,14 @@ function getRegistry({
 
 const { App } = require('@tinyhttp/app');
 const axios = require('axios').default;
-const fs = require('fs').promises;
 
 const app = new App()
 
 app.use(require('body-parser').json())
+
+app.get('/test', (req, res) => {
+  res.json({ code: 0 });
+})
 
 app.post('/substrate/decode', async (req, res) => {
   try {
@@ -114,7 +181,7 @@ async function decodePayload({ signingPayload, metadata: version, chain }) {
     let metadataRpc = null;
 
     try {
-      metadataRpc = await fs.readFile(`./metadata/${chainName.toLowerCase()}/v${version}.raw`);
+      metadataRpc = await readFileAsync(path.resolve(__dirname, `./metadata/${chainName.toLowerCase()}/v${version}.raw`));
       metadataRpc = metadataRpc.toString().trim();
     } catch (error) {
       //
@@ -140,16 +207,13 @@ async function decodePayload({ signingPayload, metadata: version, chain }) {
     metadata,
   });
 
-  // const { method } = GenericExtrinsicPayload.decodeExtrinsicPayload(registry, signingPayload, 4);
-  // const call = new GenericCall(registry, method, registry.metadata);
-  // console.log(call.toHuman());
-
-  const payload = createTypeUnsafe(registry, 'ExtrinsicPayload', [
-      signingPayload,
-      {
-          version: 4,
-      },
-  ]);
+  const payload = new GenericExtrinsicPayload(registry, signingPayload, { version: 4 });
+  // const payload = createTypeUnsafe(registry, 'ExtrinsicPayload', [
+  //     signingPayload,
+  //     {
+  //         version: 4,
+  //     },
+  // ]);
 
   const methodCall = createTypeUnsafe(registry, 'Call', [payload.method]);
   const method = toTxMethod(registry, methodCall);
