@@ -36,7 +36,8 @@ function decodeAccountId(value) {
 
 
 class GenericEthereumAccountId extends _U8aFixed.U8aFixed {
-  constructor(registry, value = new Uint8Array()) {
+  constructor(registry) {
+    let value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new Uint8Array();
     super(registry, decodeAccountId(value), 160);
   }
 

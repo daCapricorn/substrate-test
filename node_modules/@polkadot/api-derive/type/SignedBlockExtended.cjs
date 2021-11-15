@@ -19,11 +19,16 @@ function mapExtrinsics(extrinsics, records) {
   return extrinsics.map((extrinsic, index) => {
     let dispatchError;
     let dispatchInfo;
-    const events = records.filter(({
-      phase
-    }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(index)).map(({
-      event
-    }) => {
+    const events = records.filter(_ref => {
+      let {
+        phase
+      } = _ref;
+      return phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(index);
+    }).map(_ref2 => {
+      let {
+        event
+      } = _ref2;
+
       if (event.section === 'system') {
         if (event.method === 'ExtrinsicSuccess') {
           dispatchInfo = event.data[0];

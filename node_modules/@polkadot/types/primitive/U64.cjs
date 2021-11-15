@@ -16,8 +16,8 @@ var _UInt = require("../codec/UInt.cjs");
  * A 64-bit unsigned integer
  */
 class u64 extends _UInt.UInt.with(64) {
-  constructor(...args) {
-    super(...args);
+  constructor() {
+    super(...arguments);
     this.__UIntType = 'u64';
   }
 

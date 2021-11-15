@@ -75,7 +75,9 @@ class Linkage extends _Struct.Struct {
 exports.Linkage = Linkage;
 
 class LinkageResult extends _Tuple.Tuple {
-  constructor(registry, [TypeKey, keys], [TypeValue, values]) {
+  constructor(registry, _ref, _ref2) {
+    let [TypeKey, keys] = _ref;
+    let [TypeValue, values] = _ref2;
     super(registry, {
       Keys: _Vec.Vec.with(TypeKey),
       Values: _Vec.Vec.with(TypeValue)

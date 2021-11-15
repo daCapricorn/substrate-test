@@ -16,5 +16,8 @@ var _index = require("../util/index.cjs");
  * @description Get the member info for a society
  */
 function member(instanceId, api) {
-  return (0, _index.memo)(instanceId, accountId => api.derive.society._members([accountId]).pipe((0, _rxjs.map)(([result]) => result)));
+  return (0, _index.memo)(instanceId, accountId => api.derive.society._members([accountId]).pipe((0, _rxjs.map)(_ref => {
+    let [result] = _ref;
+    return result;
+  })));
 }

@@ -34,17 +34,20 @@ function queryConstants(api) {
 
 function fees(instanceId, api) {
   return (0, _index.memo)(instanceId, () => {
-    return queryConstants(api).pipe((0, _rxjs.map)(([callBaseFee, contractFee, creationFee, transactionBaseFee, transactionByteFee, transferFee, rentByteFee, rentDepositOffset, surchargeReward, tombstoneDeposit]) => ({
-      callBaseFee,
-      contractFee,
-      creationFee,
-      rentByteFee,
-      rentDepositOffset,
-      surchargeReward,
-      tombstoneDeposit,
-      transactionBaseFee,
-      transactionByteFee,
-      transferFee
-    })));
+    return queryConstants(api).pipe((0, _rxjs.map)(_ref => {
+      let [callBaseFee, contractFee, creationFee, transactionBaseFee, transactionByteFee, transferFee, rentByteFee, rentDepositOffset, surchargeReward, tombstoneDeposit] = _ref;
+      return {
+        callBaseFee,
+        contractFee,
+        creationFee,
+        rentByteFee,
+        rentDepositOffset,
+        surchargeReward,
+        tombstoneDeposit,
+        transactionBaseFee,
+        transactionByteFee,
+        transferFee
+      };
+    }));
   });
 }

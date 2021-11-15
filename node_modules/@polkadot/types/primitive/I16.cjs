@@ -16,8 +16,8 @@ var _Int = require("../codec/Int.cjs");
  * A 16-bit signed integer
  */
 class i16 extends _Int.Int.with(16) {
-  constructor(...args) {
-    super(...args);
+  constructor() {
+    super(...arguments);
     this.__IntType = 'i16';
   }
 

@@ -28,7 +28,8 @@ var _index2 = require("../util/index.cjs");
  * ```
  */
 function subscribeNewHeads(instanceId, api) {
-  return (0, _index2.memo)(instanceId, () => (0, _rxjs.combineLatest)([api.rpc.chain.subscribeNewHeads(), api.query.session ? api.query.session.validators() : (0, _rxjs.of)(undefined)]).pipe((0, _rxjs.map)(([header, validators]) => {
+  return (0, _index2.memo)(instanceId, () => (0, _rxjs.combineLatest)([api.rpc.chain.subscribeNewHeads(), api.query.session ? api.query.session.validators() : (0, _rxjs.of)(undefined)]).pipe((0, _rxjs.map)(_ref => {
+    let [header, validators] = _ref;
     header.createdAtHash = header.hash;
     return (0, _index.createHeaderExtended)(header.registry, header, validators);
   })));

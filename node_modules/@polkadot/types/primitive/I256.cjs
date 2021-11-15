@@ -16,8 +16,8 @@ var _Int = require("../codec/Int.cjs");
  * A 256-bit signed integer
  */
 class i256 extends _Int.Int.with(256) {
-  constructor(...args) {
-    super(...args);
+  constructor() {
+    super(...arguments);
     this.__IntType = 'i256';
   }
 

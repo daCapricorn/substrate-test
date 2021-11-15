@@ -26,5 +26,8 @@ var _index = require("../util/index.cjs");
  * ```
  */
 function bestNumberLag(instanceId, api) {
-  return (0, _index.memo)(instanceId, () => (0, _rxjs.combineLatest)([api.derive.chain.bestNumber(), api.derive.chain.bestNumberFinalized()]).pipe((0, _rxjs.map)(([bestNumber, bestNumberFinalized]) => api.registry.createType('BlockNumber', bestNumber.sub(bestNumberFinalized)))));
+  return (0, _index.memo)(instanceId, () => (0, _rxjs.combineLatest)([api.derive.chain.bestNumber(), api.derive.chain.bestNumberFinalized()]).pipe((0, _rxjs.map)(_ref => {
+    let [bestNumber, bestNumberFinalized] = _ref;
+    return api.registry.createType('BlockNumber', bestNumber.sub(bestNumberFinalized));
+  })));
 }

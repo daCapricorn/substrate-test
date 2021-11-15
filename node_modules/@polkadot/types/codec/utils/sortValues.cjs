@@ -81,5 +81,9 @@ function sortSet(set) {
 }
 
 function sortMap(map) {
-  return new Map(Array.from(map.entries()).sort(([keyA], [keyB]) => sortAsc(keyA, keyB)));
+  return new Map(Array.from(map.entries()).sort((_ref, _ref2) => {
+    let [keyA] = _ref;
+    let [keyB] = _ref2;
+    return sortAsc(keyA, keyB);
+  }));
 }

@@ -22,7 +22,8 @@ var _neverError = /*#__PURE__*/(0, _classPrivateFieldLooseKey2.default)("neverEr
  * An unknown type that fails on construction with the type info
  */
 class DoNotConstruct {
-  constructor(registry, typeName = 'DoNotConstruct') {
+  constructor(registry) {
+    let typeName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'DoNotConstruct';
     this.registry = void 0;
     this.createdAtHash = void 0;
     Object.defineProperty(this, _neverError, {

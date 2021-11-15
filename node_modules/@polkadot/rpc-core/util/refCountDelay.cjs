@@ -11,7 +11,8 @@ var _rxjs = require("rxjs");
 // SPDX-License-Identifier: Apache-2.0
 
 /** @internal */
-function refCountDelay(delay = 1750) {
+function refCountDelay() {
+  let delay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1750;
   return source => {
     // state: 0 = disconnected, 1 = disconnecting, 2 = connecting, 3 = connected
     let [state, refCount, connection, scheduler] = [0, 0, _rxjs.Subscription.EMPTY, _rxjs.Subscription.EMPTY];

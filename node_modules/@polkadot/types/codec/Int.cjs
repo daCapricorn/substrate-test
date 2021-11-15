@@ -21,7 +21,9 @@ var _AbstractInt = require("./AbstractInt.cjs");
  * @noInheritDoc
  */
 class Int extends _AbstractInt.AbstractInt {
-  constructor(registry, value = 0, bitLength) {
+  constructor(registry) {
+    let value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    let bitLength = arguments.length > 2 ? arguments[2] : undefined;
     super(registry, value, bitLength, true);
   }
 

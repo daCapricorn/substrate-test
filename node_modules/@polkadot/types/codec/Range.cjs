@@ -23,7 +23,8 @@ var _rangeName = /*#__PURE__*/(0, _classPrivateFieldLooseKey2.default)("rangeNam
  * Rust `Range<T>` representation
  */
 class Range extends _Tuple.Tuple {
-  constructor(registry, Type, value, rangeName = 'Range') {
+  constructor(registry, Type, value) {
+    let rangeName = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'Range';
     super(registry, {
       end: Type,
       start: Type

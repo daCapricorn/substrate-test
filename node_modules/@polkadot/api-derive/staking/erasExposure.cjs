@@ -19,12 +19,14 @@ const CACHE_KEY = 'eraExposure';
 function mapStakers(era, stakers) {
   const nominators = {};
   const validators = {};
-  stakers.forEach(([key, exposure]) => {
+  stakers.forEach(_ref => {
+    let [key, exposure] = _ref;
     const validatorId = key.args[1].toString();
     validators[validatorId] = exposure;
-    exposure.others.forEach(({
-      who
-    }, validatorIndex) => {
+    exposure.others.forEach((_ref2, validatorIndex) => {
+      let {
+        who
+      } = _ref2;
       const nominatorId = who.toString();
       nominators[nominatorId] = nominators[nominatorId] || [];
       nominators[nominatorId].push({
@@ -61,5 +63,8 @@ function _erasExposure(instanceId, api) {
 }
 
 function erasExposure(instanceId, api) {
-  return (0, _index.memo)(instanceId, (withActive = false) => api.derive.staking.erasHistoric(withActive).pipe((0, _rxjs.switchMap)(eras => api.derive.staking._erasExposure(eras, withActive))));
+  return (0, _index.memo)(instanceId, function () {
+    let withActive = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    return api.derive.staking.erasHistoric(withActive).pipe((0, _rxjs.switchMap)(eras => api.derive.staking._erasExposure(eras, withActive)));
+  });
 }

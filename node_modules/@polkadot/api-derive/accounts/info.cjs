@@ -25,16 +25,22 @@ function retrieveNick(api, accountId) {
 
 
 function info(instanceId, api) {
-  return (0, _index.memo)(instanceId, address => api.derive.accounts.idAndIndex(address).pipe((0, _rxjs.switchMap)(([accountId, accountIndex]) => (0, _rxjs.combineLatest)([(0, _rxjs.of)({
-    accountId,
-    accountIndex
-  }), api.derive.accounts.identity(accountId), retrieveNick(api, accountId)])), (0, _rxjs.map)(([{
-    accountId,
-    accountIndex
-  }, identity, nickname]) => ({
-    accountId,
-    accountIndex,
-    identity,
-    nickname
-  }))));
+  return (0, _index.memo)(instanceId, address => api.derive.accounts.idAndIndex(address).pipe((0, _rxjs.switchMap)(_ref => {
+    let [accountId, accountIndex] = _ref;
+    return (0, _rxjs.combineLatest)([(0, _rxjs.of)({
+      accountId,
+      accountIndex
+    }), api.derive.accounts.identity(accountId), retrieveNick(api, accountId)]);
+  }), (0, _rxjs.map)(_ref2 => {
+    let [{
+      accountId,
+      accountIndex
+    }, identity, nickname] = _ref2;
+    return {
+      accountId,
+      accountIndex,
+      identity,
+      nickname
+    };
+  })));
 }

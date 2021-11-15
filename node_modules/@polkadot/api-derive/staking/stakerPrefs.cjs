@@ -21,5 +21,8 @@ function _stakerPrefs(instanceId, api) {
 }
 
 function stakerPrefs(instanceId, api) {
-  return (0, _index.memo)(instanceId, (accountId, withActive = false) => api.derive.staking.erasHistoric(withActive).pipe((0, _rxjs.switchMap)(eras => api.derive.staking._stakerPrefs(accountId, eras, withActive))));
+  return (0, _index.memo)(instanceId, function (accountId) {
+    let withActive = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    return api.derive.staking.erasHistoric(withActive).pipe((0, _rxjs.switchMap)(eras => api.derive.staking._stakerPrefs(accountId, eras, withActive)));
+  });
 }

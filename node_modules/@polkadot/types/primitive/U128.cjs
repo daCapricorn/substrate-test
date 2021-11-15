@@ -16,8 +16,8 @@ var _UInt = require("../codec/UInt.cjs");
  * A 128-bit unsigned integer
  */
 class u128 extends _UInt.UInt.with(128) {
-  constructor(...args) {
-    super(...args);
+  constructor() {
+    super(...arguments);
     this.__UIntType = 'u128';
   }
 

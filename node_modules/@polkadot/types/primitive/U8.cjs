@@ -16,8 +16,8 @@ var _UInt = require("../codec/UInt.cjs");
  * An 8-bit unsigned integer
  */
 class u8 extends _UInt.UInt.with(8) {
-  constructor(...args) {
-    super(...args);
+  constructor() {
+    super(...arguments);
     this.__UIntType = 'u8';
   }
 

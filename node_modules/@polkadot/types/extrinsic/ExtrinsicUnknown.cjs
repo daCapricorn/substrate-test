@@ -18,10 +18,11 @@ var _constants = require("./constants.cjs");
  * A default handler for extrinsics where the version is not known (default throw)
  */
 class GenericExtrinsicUnknown extends _Struct.Struct {
-  constructor(registry, value, {
-    isSigned = false,
-    version = 0
-  } = {}) {
+  constructor(registry, value) {
+    let {
+      isSigned = false,
+      version = 0
+    } = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     super(registry, {});
     throw new Error(`Unsupported ${isSigned ? '' : 'un'}signed extrinsic version ${version & _constants.UNMASK_VERSION}`);
   }

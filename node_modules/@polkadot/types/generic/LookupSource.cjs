@@ -53,7 +53,8 @@ function decodeU8a(registry, value) {
 
 
 class GenericLookupSource extends _Base.Base {
-  constructor(registry, value = new Uint8Array()) {
+  constructor(registry) {
+    let value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new Uint8Array();
     super(registry, GenericLookupSource._decodeAddress(registry, value));
   }
   /** @internal */

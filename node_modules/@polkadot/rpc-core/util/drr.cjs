@@ -35,10 +35,13 @@ const NOOP = () => undefined;
  */
 
 
-const drr = ({
-  delay,
-  skipChange = false,
-  skipTimeout = false
-} = {}) => source$ => source$.pipe((0, _rxjs.catchError)(ERR), skipChange ? (0, _rxjs.tap)(NOOP) : (0, _rxjs.distinctUntilChanged)(CMP), (0, _rxjs.publishReplay)(1), skipTimeout ? (0, _rxjs.refCount)() : (0, _refCountDelay.refCountDelay)(delay));
+const drr = function () {
+  let {
+    delay,
+    skipChange = false,
+    skipTimeout = false
+  } = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return source$ => source$.pipe((0, _rxjs.catchError)(ERR), skipChange ? (0, _rxjs.tap)(NOOP) : (0, _rxjs.distinctUntilChanged)(CMP), (0, _rxjs.publishReplay)(1), skipTimeout ? (0, _rxjs.refCount)() : (0, _refCountDelay.refCountDelay)(delay));
+};
 
 exports.drr = drr;

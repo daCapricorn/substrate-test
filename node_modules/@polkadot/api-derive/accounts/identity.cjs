@@ -24,7 +24,8 @@ function dataAsString(data) {
 }
 
 function extractOther(additional) {
-  return additional.reduce((other, [_key, _value]) => {
+  return additional.reduce((other, _ref) => {
+    let [_key, _value] = _ref;
     const key = dataAsString(_key);
     const value = dataAsString(_value);
 
@@ -90,36 +91,48 @@ function getBase(api, accountId) {
 
 
 function identity(instanceId, api) {
-  return (0, _index.memo)(instanceId, accountId => getBase(api, accountId).pipe((0, _rxjs.switchMap)(([identityOfOpt, superOfOpt]) => getParent(api, identityOfOpt, superOfOpt)), (0, _rxjs.map)(([identityOfOpt, superOf]) => extractIdentity(identityOfOpt, superOf))));
+  return (0, _index.memo)(instanceId, accountId => getBase(api, accountId).pipe((0, _rxjs.switchMap)(_ref2 => {
+    let [identityOfOpt, superOfOpt] = _ref2;
+    return getParent(api, identityOfOpt, superOfOpt);
+  }), (0, _rxjs.map)(_ref3 => {
+    let [identityOfOpt, superOf] = _ref3;
+    return extractIdentity(identityOfOpt, superOf);
+  })));
 }
 
 function hasIdentity(instanceId, api) {
-  return (0, _index.memo)(instanceId, accountId => api.derive.accounts.hasIdentityMulti([accountId]).pipe((0, _rxjs.map)(([first]) => first)));
+  return (0, _index.memo)(instanceId, accountId => api.derive.accounts.hasIdentityMulti([accountId]).pipe((0, _rxjs.map)(_ref4 => {
+    let [first] = _ref4;
+    return first;
+  })));
 }
 
 function hasIdentityMulti(instanceId, api) {
   return (0, _index.memo)(instanceId, accountIds => {
     var _api$query$identity2;
 
-    return (_api$query$identity2 = api.query.identity) !== null && _api$query$identity2 !== void 0 && _api$query$identity2.identityOf ? (0, _rxjs.combineLatest)([api.query.identity.identityOf.multi(accountIds), api.query.identity.superOf.multi(accountIds)]).pipe((0, _rxjs.map)(([identities, supers]) => identities.map((identityOfOpt, index) => {
-      const superOfOpt = supers[index];
-      const parentId = superOfOpt && superOfOpt.isSome ? superOfOpt.unwrap()[0].toString() : undefined;
-      let display;
+    return (_api$query$identity2 = api.query.identity) !== null && _api$query$identity2 !== void 0 && _api$query$identity2.identityOf ? (0, _rxjs.combineLatest)([api.query.identity.identityOf.multi(accountIds), api.query.identity.superOf.multi(accountIds)]).pipe((0, _rxjs.map)(_ref5 => {
+      let [identities, supers] = _ref5;
+      return identities.map((identityOfOpt, index) => {
+        const superOfOpt = supers[index];
+        const parentId = superOfOpt && superOfOpt.isSome ? superOfOpt.unwrap()[0].toString() : undefined;
+        let display;
 
-      if (identityOfOpt && identityOfOpt.isSome) {
-        const value = dataAsString(identityOfOpt.unwrap().info.display);
+        if (identityOfOpt && identityOfOpt.isSome) {
+          const value = dataAsString(identityOfOpt.unwrap().info.display);
 
-        if (value && !(0, _util.isHex)(value)) {
-          display = value;
+          if (value && !(0, _util.isHex)(value)) {
+            display = value;
+          }
         }
-      }
 
-      return {
-        display,
-        hasIdentity: !!(display || parentId),
-        parentId
-      };
-    }))) : (0, _rxjs.of)(accountIds.map(() => ({
+        return {
+          display,
+          hasIdentity: !!(display || parentId),
+          parentId
+        };
+      });
+    })) : (0, _rxjs.of)(accountIds.map(() => ({
       hasIdentity: false
     })));
   });

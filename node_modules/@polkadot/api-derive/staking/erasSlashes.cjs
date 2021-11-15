@@ -19,10 +19,12 @@ const CACHE_KEY = 'eraSlashes';
 function mapSlashes(era, noms, vals) {
   const nominators = {};
   const validators = {};
-  noms.forEach(([key, optBalance]) => {
+  noms.forEach(_ref => {
+    let [key, optBalance] = _ref;
     nominators[key.args[1].toString()] = optBalance.unwrap();
   });
-  vals.forEach(([key, optRes]) => {
+  vals.forEach(_ref2 => {
+    let [key, optRes] = _ref2;
     validators[key.args[1].toString()] = optRes.unwrapOrDefault()[1];
   });
   return {
@@ -36,7 +38,8 @@ function _eraSlashes(instanceId, api) {
   return (0, _index.memo)(instanceId, (era, withActive) => {
     const cacheKey = `${CACHE_KEY}-${era.toString()}`;
     const cached = withActive ? undefined : _index.deriveCache.get(cacheKey);
-    return cached ? (0, _rxjs.of)(cached) : (0, _rxjs.combineLatest)([api.query.staking.nominatorSlashInEra.entries(era), api.query.staking.validatorSlashInEra.entries(era)]).pipe((0, _rxjs.map)(([noms, vals]) => {
+    return cached ? (0, _rxjs.of)(cached) : (0, _rxjs.combineLatest)([api.query.staking.nominatorSlashInEra.entries(era), api.query.staking.validatorSlashInEra.entries(era)]).pipe((0, _rxjs.map)(_ref3 => {
+      let [noms, vals] = _ref3;
       const value = mapSlashes(era, noms, vals);
       !withActive && _index.deriveCache.set(cacheKey, value);
       return value;
@@ -53,5 +56,8 @@ function _erasSlashes(instanceId, api) {
 }
 
 function erasSlashes(instanceId, api) {
-  return (0, _index.memo)(instanceId, (withActive = false) => api.derive.staking.erasHistoric(withActive).pipe((0, _rxjs.switchMap)(eras => api.derive.staking._erasSlashes(eras, withActive))));
+  return (0, _index.memo)(instanceId, function () {
+    let withActive = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    return api.derive.staking.erasHistoric(withActive).pipe((0, _rxjs.switchMap)(eras => api.derive.staking._erasSlashes(eras, withActive)));
+  });
 }

@@ -43,7 +43,8 @@ function decodeAccountIndex(value) {
 
 
 class GenericAccountIndex extends _U.u32 {
-  constructor(registry, value = new _util.BN(0)) {
+  constructor(registry) {
+    let value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : new _util.BN(0);
     super(registry, decodeAccountIndex(value));
   }
 

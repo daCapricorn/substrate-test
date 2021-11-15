@@ -23,15 +23,18 @@ const VERSIONS = ['ExtrinsicPayloadUnknown', // v0 is unknown
  */
 
 class GenericExtrinsicPayload extends _Base.Base {
-  constructor(registry, value, {
-    version
-  } = {}) {
+  constructor(registry, value) {
+    let {
+      version
+    } = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     super(registry, GenericExtrinsicPayload.decodeExtrinsicPayload(registry, value, version));
   }
   /** @internal */
 
 
-  static decodeExtrinsicPayload(registry, value, version = _constants.DEFAULT_VERSION) {
+  static decodeExtrinsicPayload(registry, value) {
+    let version = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _constants.DEFAULT_VERSION;
+
     if (value instanceof GenericExtrinsicPayload) {
       return value._raw;
     }

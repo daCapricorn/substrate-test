@@ -16,8 +16,8 @@ var _Int = require("../codec/Int.cjs");
  * A 32-bit signed integer
  */
 class i32 extends _Int.Int.with(32) {
-  constructor(...args) {
-    super(...args);
+  constructor() {
+    super(...arguments);
     this.__IntType = 'i32';
   }
 

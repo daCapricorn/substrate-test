@@ -16,8 +16,8 @@ var _Int = require("../codec/Int.cjs");
  * An 8-bit signed integer
  */
 class i8 extends _Int.Int.with(8) {
-  constructor(...args) {
-    super(...args);
+  constructor() {
+    super(...arguments);
     this.__IntType = 'i8';
   }
 

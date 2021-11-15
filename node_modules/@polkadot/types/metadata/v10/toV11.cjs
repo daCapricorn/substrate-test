@@ -9,9 +9,10 @@ exports.toV11 = toV11;
 // SPDX-License-Identifier: Apache-2.0
 
 /** @internal */
-function toV11(registry, {
-  modules
-}) {
+function toV11(registry, _ref) {
+  let {
+    modules
+  } = _ref;
   return registry.createType('MetadataV11', {
     // This is new in V11, pass V0 here - something non-existing, telling the API to use
     // the fallback for this information (on-chain detection)

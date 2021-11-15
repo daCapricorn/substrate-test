@@ -16,7 +16,10 @@ var _index = require("../util/index.cjs");
  * @description Retrieve the staking overview, including elected and points earned
  */
 function currentPoints(instanceId, api) {
-  return (0, _index.memo)(instanceId, () => api.derive.session.indexes().pipe((0, _rxjs.switchMap)(({
-    activeEra
-  }) => api.query.staking.erasRewardPoints(activeEra))));
+  return (0, _index.memo)(instanceId, () => api.derive.session.indexes().pipe((0, _rxjs.switchMap)(_ref => {
+    let {
+      activeEra
+    } = _ref;
+    return api.query.staking.erasRewardPoints(activeEra);
+  })));
 }

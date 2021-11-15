@@ -31,12 +31,15 @@ function fees(instanceId, api) {
 
     return (0, _rxjs.of)([// deprecated - remove
     ((_api$consts$balances = api.consts.balances) === null || _api$consts$balances === void 0 ? void 0 : _api$consts$balances.creationFee) || api.registry.createType('Balance'), ((_api$consts$balances2 = api.consts.balances) === null || _api$consts$balances2 === void 0 ? void 0 : _api$consts$balances2.transferFee) || api.registry.createType('Balance'), // current
-    ((_api$consts$balances3 = api.consts.balances) === null || _api$consts$balances3 === void 0 ? void 0 : _api$consts$balances3.existentialDeposit) || api.registry.createType('Balance'), ((_api$consts$transacti = api.consts.transactionPayment) === null || _api$consts$transacti === void 0 ? void 0 : _api$consts$transacti.transactionBaseFee) || api.registry.createType('Balance'), ((_api$consts$transacti2 = api.consts.transactionPayment) === null || _api$consts$transacti2 === void 0 ? void 0 : _api$consts$transacti2.transactionByteFee) || api.registry.createType('Balance')]).pipe((0, _rxjs.map)(([creationFee, transferFee, existentialDeposit, transactionBaseFee, transactionByteFee]) => ({
-      creationFee,
-      existentialDeposit,
-      transactionBaseFee,
-      transactionByteFee,
-      transferFee
-    })));
+    ((_api$consts$balances3 = api.consts.balances) === null || _api$consts$balances3 === void 0 ? void 0 : _api$consts$balances3.existentialDeposit) || api.registry.createType('Balance'), ((_api$consts$transacti = api.consts.transactionPayment) === null || _api$consts$transacti === void 0 ? void 0 : _api$consts$transacti.transactionBaseFee) || api.registry.createType('Balance'), ((_api$consts$transacti2 = api.consts.transactionPayment) === null || _api$consts$transacti2 === void 0 ? void 0 : _api$consts$transacti2.transactionByteFee) || api.registry.createType('Balance')]).pipe((0, _rxjs.map)(_ref => {
+      let [creationFee, transferFee, existentialDeposit, transactionBaseFee, transactionByteFee] = _ref;
+      return {
+        creationFee,
+        existentialDeposit,
+        transactionBaseFee,
+        transactionByteFee,
+        transferFee
+      };
+    }));
   });
 }

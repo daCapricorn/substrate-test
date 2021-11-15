@@ -43,16 +43,20 @@ function checkOrder(network, versions) {
 /** @internal */
 
 
-function mapRaw([network, versions]) {
+function mapRaw(_ref) {
+  let [network, versions] = _ref;
   const chain = _networks.selectableNetworks.find(n => n.network === network) || NET_EXTRA[network];
   (0, _util.assert)(chain, () => `Unable to find info for chain ${network}`);
   return {
     genesisHash: (0, _util.hexToU8a)(chain.genesisHash[0]),
     network,
-    versions: checkOrder(network, versions).map(([blockNumber, specVersion]) => ({
-      blockNumber: new _util.BN(blockNumber),
-      specVersion: new _util.BN(specVersion)
-    }))
+    versions: checkOrder(network, versions).map(_ref2 => {
+      let [blockNumber, specVersion] = _ref2;
+      return {
+        blockNumber: new _util.BN(blockNumber),
+        specVersion: new _util.BN(specVersion)
+      };
+    })
   };
 } // Type overrides for specific spec types & versions as given in runtimeVersion
 

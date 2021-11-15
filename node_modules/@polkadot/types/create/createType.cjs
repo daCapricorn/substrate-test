@@ -26,7 +26,10 @@ function checkInstance(created, matcher) {
   (0, _util.assert)(isOk, () => `${rawType}:: Decoded input doesn't match input, received ${(0, _util.u8aToHex)(matcher, 512)} (${matcher.length} bytes), created ${(0, _util.u8aToHex)(u8a, 512)} (${u8a.length} bytes)`);
 }
 
-function checkPedantic(created, [value], isPedantic = false) {
+function checkPedantic(created, _ref) {
+  let [value] = _ref;
+  let isPedantic = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
   if (isPedantic) {
     if ((0, _util.isU8a)(value)) {
       checkInstance(created, value);
@@ -38,11 +41,13 @@ function checkPedantic(created, [value], isPedantic = false) {
 // where isPedantic is specified (storage decoding), also check the format/structure
 
 
-function initType(registry, Type, params = [], {
-  blockHash,
-  isOptional,
-  isPedantic
-} = {}) {
+function initType(registry, Type) {
+  let params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+  let {
+    blockHash,
+    isOptional,
+    isPedantic
+  } = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
   const created = new (isOptional ? _Option.Option.with(Type) : Type)(registry, ...params);
   checkPedantic(created, params, isPedantic);
 
@@ -57,7 +62,9 @@ function initType(registry, Type, params = [], {
 // runtime error.
 
 
-function createTypeUnsafe(registry, type, params = [], options = {}) {
+function createTypeUnsafe(registry, type) {
+  let params = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+  let options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
   let Clazz = null;
   let firstError = null;
 
@@ -86,6 +93,10 @@ function createTypeUnsafe(registry, type, params = [], options = {}) {
  */
 
 
-function createType(registry, type, ...params) {
+function createType(registry, type) {
+  for (var _len = arguments.length, params = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+    params[_key - 2] = arguments[_key];
+  }
+
   return createTypeUnsafe(registry, type, params);
 }

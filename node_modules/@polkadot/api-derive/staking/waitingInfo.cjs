@@ -17,14 +17,18 @@ const DEFAULT_FLAGS = {
 };
 
 function waitingInfo(instanceId, api) {
-  return (0, _index.memo)(instanceId, (flags = DEFAULT_FLAGS) => (0, _rxjs.combineLatest)([api.derive.staking.validators(), api.derive.staking.stashes()]).pipe((0, _rxjs.switchMap)(([{
-    nextElected
-  }, stashes]) => {
-    const elected = nextElected.map(a => a.toString());
-    const waiting = stashes.filter(v => !elected.includes(v.toString()));
-    return api.derive.staking.queryMulti(waiting, flags).pipe((0, _rxjs.map)(info => ({
-      info,
-      waiting
-    })));
-  })));
+  return (0, _index.memo)(instanceId, function () {
+    let flags = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DEFAULT_FLAGS;
+    return (0, _rxjs.combineLatest)([api.derive.staking.validators(), api.derive.staking.stashes()]).pipe((0, _rxjs.switchMap)(_ref => {
+      let [{
+        nextElected
+      }, stashes] = _ref;
+      const elected = nextElected.map(a => a.toString());
+      const waiting = stashes.filter(v => !elected.includes(v.toString()));
+      return api.derive.staking.queryMulti(waiting, flags).pipe((0, _rxjs.map)(info => ({
+        info,
+        waiting
+      })));
+    }));
+  });
 }

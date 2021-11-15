@@ -18,7 +18,8 @@ const CACHE_KEY = 'eraPrefs';
 
 function mapPrefs(era, all) {
   const validators = {};
-  all.forEach(([key, prefs]) => {
+  all.forEach(_ref => {
+    let [key, prefs] = _ref;
     validators[key.args[1].toString()] = prefs;
   });
   return {
@@ -48,5 +49,8 @@ function _erasPrefs(instanceId, api) {
 }
 
 function erasPrefs(instanceId, api) {
-  return (0, _index.memo)(instanceId, (withActive = false) => api.derive.staking.erasHistoric(withActive).pipe((0, _rxjs.switchMap)(eras => api.derive.staking._erasPrefs(eras, withActive))));
+  return (0, _index.memo)(instanceId, function () {
+    let withActive = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    return api.derive.staking.erasHistoric(withActive).pipe((0, _rxjs.switchMap)(eras => api.derive.staking._erasPrefs(eras, withActive)));
+  });
 }

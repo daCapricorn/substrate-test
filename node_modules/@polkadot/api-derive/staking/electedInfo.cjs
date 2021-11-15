@@ -24,12 +24,18 @@ function combineAccounts(nextElected, validators) {
 }
 
 function electedInfo(instanceId, api) {
-  return (0, _index.memo)(instanceId, (flags = DEFAULT_FLAGS) => api.derive.staking.validators().pipe((0, _rxjs.switchMap)(({
-    nextElected,
-    validators
-  }) => api.derive.staking.queryMulti(combineAccounts(nextElected, validators), flags).pipe((0, _rxjs.map)(info => ({
-    info,
-    nextElected,
-    validators
-  }))))));
+  return (0, _index.memo)(instanceId, function () {
+    let flags = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DEFAULT_FLAGS;
+    return api.derive.staking.validators().pipe((0, _rxjs.switchMap)(_ref => {
+      let {
+        nextElected,
+        validators
+      } = _ref;
+      return api.derive.staking.queryMulti(combineAccounts(nextElected, validators), flags).pipe((0, _rxjs.map)(info => ({
+        info,
+        nextElected,
+        validators
+      })));
+    }));
+  });
 }

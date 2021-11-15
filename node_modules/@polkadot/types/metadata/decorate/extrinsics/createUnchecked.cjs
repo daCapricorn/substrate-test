@@ -19,7 +19,11 @@ function createUnchecked(registry, section, callIndex, callMetadata) {
   const expectedArgs = callMetadata.fields;
   const funcName = (0, _util.stringCamelCase)(callMetadata.name);
 
-  const extrinsicFn = (...args) => {
+  const extrinsicFn = function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
     (0, _util.assert)(expectedArgs.length === args.length, () => `Extrinsic ${section}.${funcName} expects ${expectedArgs.length} arguments, got ${args.length}.`);
     return registry.createType('Call', {
       args,

@@ -22,11 +22,15 @@ function _ownSlashes(instanceId, api) {
 }
 
 function ownSlash(instanceId, api) {
-  return (0, _index.memo)(instanceId, (accountId, era) => api.derive.staking._ownSlashes(accountId, [era], true).pipe((0, _rxjs.map)(([first]) => first)));
+  return (0, _index.memo)(instanceId, (accountId, era) => api.derive.staking._ownSlashes(accountId, [era], true).pipe((0, _rxjs.map)(_ref => {
+    let [first] = _ref;
+    return first;
+  })));
 }
 
 function ownSlashes(instanceId, api) {
-  return (0, _index.memo)(instanceId, (accountId, withActive = false) => {
+  return (0, _index.memo)(instanceId, function (accountId) {
+    let withActive = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     return api.derive.staking.erasHistoric(withActive).pipe((0, _rxjs.switchMap)(eras => api.derive.staking._ownSlashes(accountId, eras, withActive)));
   });
 }

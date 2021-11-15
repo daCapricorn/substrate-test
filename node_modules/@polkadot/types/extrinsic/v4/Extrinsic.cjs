@@ -20,9 +20,10 @@ exports.EXTRINSIC_VERSION = EXTRINSIC_VERSION;
  * The third generation of compact extrinsics
  */
 class GenericExtrinsicV4 extends _Struct.Struct {
-  constructor(registry, value, {
-    isSigned
-  } = {}) {
+  constructor(registry, value) {
+    let {
+      isSigned
+    } = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     super(registry, {
       signature: 'ExtrinsicSignatureV4',
       // eslint-disable-next-line sort-keys
@@ -32,7 +33,9 @@ class GenericExtrinsicV4 extends _Struct.Struct {
   /** @internal */
 
 
-  static decodeExtrinsic(registry, value, isSigned = false) {
+  static decodeExtrinsic(registry, value) {
+    let isSigned = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
     if (value instanceof GenericExtrinsicV4) {
       return value;
     } else if (value instanceof registry.createClass('Call')) {

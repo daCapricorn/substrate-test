@@ -16,8 +16,8 @@ var _UInt = require("../codec/UInt.cjs");
  * A 16-bit unsigned integer
  */
 class u16 extends _UInt.UInt.with(16) {
-  constructor(...args) {
-    super(...args);
+  constructor() {
+    super(...arguments);
     this.__UIntType = 'u16';
   }
 

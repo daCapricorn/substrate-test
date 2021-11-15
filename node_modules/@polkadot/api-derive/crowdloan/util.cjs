@@ -12,18 +12,23 @@ function extractContributed(paraId, events) {
 
   const added = [];
   const removed = [];
-  return events.filter(({
-    event: {
-      data: [, eventParaId],
-      method,
-      section
-    }
-  }) => section === 'crowdloan' && ['Contributed', 'Withdrew'].includes(method) && eventParaId.eq(paraId)).reduce((result, {
-    event: {
-      data: [accountId],
-      method
-    }
-  }) => {
+  return events.filter(_ref => {
+    let {
+      event: {
+        data: [, eventParaId],
+        method,
+        section
+      }
+    } = _ref;
+    return section === 'crowdloan' && ['Contributed', 'Withdrew'].includes(method) && eventParaId.eq(paraId);
+  }).reduce((result, _ref2) => {
+    let {
+      event: {
+        data: [accountId],
+        method
+      }
+    } = _ref2;
+
     if (method === 'Contributed') {
       result.added.push(accountId.toHex());
     } else {

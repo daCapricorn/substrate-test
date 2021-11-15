@@ -16,8 +16,8 @@ var _UInt = require("../codec/UInt.cjs");
  * A 32-bit unsigned integer
  */
 class u32 extends _UInt.UInt.with(32) {
-  constructor(...args) {
-    super(...args);
+  constructor() {
+    super(...arguments);
     this.__UIntType = 'u32';
   }
 

@@ -20,7 +20,8 @@ var _Text = require("./Text.cjs");
  * i.e. we remove the `T::` prefixes found in some types for consistency across implementation.
  */
 class Type extends _Text.Text {
-  constructor(registry, value = '') {
+  constructor(registry) {
+    let value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
     super(registry, value);
     this.setOverride((0, _sanitize.sanitize)(this.toString()));
   }

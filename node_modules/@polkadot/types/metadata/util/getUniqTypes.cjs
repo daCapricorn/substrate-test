@@ -14,31 +14,39 @@ var _validateTypes = require("./validateTypes.cjs");
 
 /** @internal */
 function extractTypes(lookup, types) {
-  return types.map(({
-    type
-  }) => lookup.getTypeDef(type).type);
+  return types.map(_ref => {
+    let {
+      type
+    } = _ref;
+    return lookup.getTypeDef(type).type;
+  });
 }
 /** @internal */
 
 
 function extractFieldTypes(lookup, type) {
-  return lookup.getSiType(type).def.asVariant.variants.map(({
-    fields
-  }) => extractTypes(lookup, fields));
+  return lookup.getSiType(type).def.asVariant.variants.map(_ref2 => {
+    let {
+      fields
+    } = _ref2;
+    return extractTypes(lookup, fields);
+  });
 }
 /** @internal */
 
 
-function getPalletNames({
-  lookup,
-  pallets
-}) {
-  return pallets.reduce((all, {
-    calls,
-    constants,
-    events,
-    storage
-  }) => {
+function getPalletNames(_ref3) {
+  let {
+    lookup,
+    pallets
+  } = _ref3;
+  return pallets.reduce((all, _ref4) => {
+    let {
+      calls,
+      constants,
+      events,
+      storage
+    } = _ref4;
     all.push([extractTypes(lookup, constants)]);
 
     if (calls.isSome) {
@@ -50,9 +58,11 @@ function getPalletNames({
     }
 
     if (storage.isSome) {
-      all.push(storage.unwrap().items.map(({
-        type
-      }) => {
+      all.push(storage.unwrap().items.map(_ref5 => {
+        let {
+          type
+        } = _ref5;
+
         if (type.isPlain) {
           return [lookup.getTypeDef(type.asPlain).type];
         }

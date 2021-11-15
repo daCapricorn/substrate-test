@@ -43,16 +43,19 @@ function clearCache(cache) {
   // clear all expired values
   const now = Date.now();
   const all = [];
-  cache.forEach((key, {
-    x
-  }) => {
+  cache.forEach((key, _ref) => {
+    let {
+      x
+    } = _ref;
     now - x > CHACHE_EXPIRY && all.push(key);
   }); // don't do delete inside loop, just in-case
 
   all.forEach(key => cache.del(key));
 }
 
-function setDeriveCache(prefix = '', cache) {
+function setDeriveCache() {
+  let prefix = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+  let cache = arguments.length > 1 ? arguments[1] : undefined;
   exports.deriveCache = deriveCache = cache ? wrapCache(`derive:${prefix}:`, cache) : _cacheImpl.deriveNoopCache;
 
   if (cache) {
