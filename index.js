@@ -1,8 +1,56 @@
-const { createMetadata, getSpecTypes, toTxMethod } = require('@substrate/txwrapper-core');
-const { createTypeUnsafe, TypeRegistry } = require('@polkadot/types');
+const { createMetadata, getSpecTypes } = require('@substrate/txwrapper-core');
+const { createTypeUnsafe, Compact, GenericCall, TypeRegistry, Vec } = require('@polkadot/types');
+const { AbstractInt } = require('@polkadot/types/codec/AbstractInt');
+const { stringCamelCase } = require('@polkadot/util');
 // const { u8aToHex, hexToU8a } = require('@polkadot/util');
 // const { blake2AsU8a, blake2AsHex } = require('@polkadot/util-crypto');
 // const { GenericExtrinsicPayload, GenericCall } = require('@polkadot/types');
+const fs = require('fs');
+const path = require('path');
+
+function toTxMethod(registry, method) {
+	// Mapping of argName->argType
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+	const argsDef = JSON.parse(method.Type.args);
+	// Mapping of argName->argValue
+	const args = Object.keys(argsDef).reduce((accumulator, key, index) => {
+    // console.log(`payload.method ${index}`, method.args[index]);
+		let codec = createTypeUnsafe(registry, argsDef[key], [
+			method.args[index],
+		]);
+
+		if (codec instanceof Compact) {
+			// Unwrap the compact so we can check the interior type
+			codec = codec.unwrap();
+		}
+
+		// Forcibly serialize all integers to strings
+		let jsonArg =
+			codec instanceof AbstractInt ? codec.toString(10) : codec.toJSON();
+
+    if (codec instanceof GenericCall) {
+      const call = toTxMethod(registry, codec);
+      jsonArg = { callIndex: jsonArg.callIndex, extrinsic: `${call.pallet}.${call.name}(${Object.keys(jsonArg.args).join(',')})`, ...jsonArg };
+    }
+
+    if (codec instanceof Vec && codec.toRawType() == 'Vec<Call>') { // instanceof Vec<Call>
+      jsonArg = jsonArg.map((arg, argIndex) => {
+        const call = toTxMethod(registry, codec[argIndex]);
+        return { callIndex: arg.callIndex, extrinsic: `${call.pallet}.${call.name}(${Object.keys(arg.args).join(',')})`, ...arg };
+      });
+    }
+
+		accumulator[stringCamelCase(key)] = jsonArg;
+		return accumulator;
+	}, {});
+
+	return {
+		args,
+    argsDef,
+		name: method.method,
+		pallet: method.section,
+	};
+}
 
 const PolkadotSS58Format = {
   polkadot: 0,
@@ -31,27 +79,36 @@ const KNOWN_CHAIN_PROPERTIES = {
 
 // metadata cache
 const METADATA_MAP = {
-  Westend: null,
+  // Westend: null,
   Polkadot: null,
 };
 
 // The default type registry has polkadot types
 const registry = new TypeRegistry();
 
+function readFileAsync(filePath) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filePath, (err, res) => {
+      if (err) return reject(err);
+      resolve(res);
+    })
+  });
+}
+
 // preload
 (async () => {
   await Promise.all(Object.keys(METADATA_MAP).map(async (chainName) => {
     try {
-      let metadataRpc = await fs.readFile(`./metadata/${chainName.toLowerCase()}/v14.raw`);
+      let metadataRpc = await readFileAsync(path.resolve(__dirname, `./metadata/${chainName.toLowerCase()}/v14.raw`));
       metadataRpc = metadataRpc.toString().trim();
       METADATA_MAP[chainName] = createMetadata(registry, metadataRpc);
     } catch (error) {
-      //
+      console.error(error);
     }
   }));
 })();
 
-function getRegistry({
+function configRegistry({
   specName,
   chainName,
   specVersion,
@@ -75,16 +132,19 @@ function getRegistry({
   const chainProperties = properties || KNOWN_CHAIN_PROPERTIES[specName];
   registry.setChainProperties(registry.createType('ChainProperties', chainProperties));
   
-  return registry;
+  return chainProperties;
 }
 
 const { App } = require('@tinyhttp/app');
 const axios = require('axios').default;
-const fs = require('fs').promises;
 
 const app = new App()
 
 app.use(require('body-parser').json())
+
+app.get('/test', (req, res) => {
+  res.json({ code: 0 });
+})
 
 app.post('/substrate/decode', async (req, res) => {
   try {
@@ -114,7 +174,7 @@ async function decodePayload({ signingPayload, metadata: version, chain }) {
     let metadataRpc = null;
 
     try {
-      metadataRpc = await fs.readFile(`./metadata/${chainName.toLowerCase()}/v${version}.raw`);
+      metadataRpc = await readFileAsync(path.resolve(__dirname, `./metadata/${chainName.toLowerCase()}/v${version}.raw`));
       metadataRpc = metadataRpc.toString().trim();
     } catch (error) {
       //
@@ -134,7 +194,7 @@ async function decodePayload({ signingPayload, metadata: version, chain }) {
     metadata = createMetadata(registry, metadataRpc);
   }
 
-  getRegistry({
+  const chainProperties = configRegistry({
     chainName,
     specName: chainName.toLowerCase(),
     metadata,
@@ -155,6 +215,7 @@ async function decodePayload({ signingPayload, metadata: version, chain }) {
   const method = toTxMethod(registry, methodCall);
 
   const decoded = {
+      chainProperties,
       blockHash: payload.blockHash.toHex(),
       eraPeriod: payload.era.asMortalEra.period.toNumber(),
       genesisHash: payload.genesisHash.toHex(),
